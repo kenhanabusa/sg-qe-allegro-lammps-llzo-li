@@ -7,15 +7,23 @@ artifacts/
 dataset/raw/
 dataset/train.extxyz
 
-# generated models (created by deploy)
+# compiled models
 lammps/models/*.nequip.pth
 lammps/models/model.nequip.pth
 
 # tool clones / build dirs
 tools/allegro_upstream/
-tools/build_lammps_pair_allegro/
-tools/src_lammps/
-tools/src_pair_nequip_allegro/
+tools/src_*/
+tools/build_*/
+
+# accidental downloads/logs
+aspirin_data/
+lightning_logs/
+
+# backups and temp files
+*.bak.*
+Makefile.bak.*
+.run_id
 
 # python junk
 __pycache__/
