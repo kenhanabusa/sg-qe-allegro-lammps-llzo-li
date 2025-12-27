@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RID_FILE="$ROOT/.run_id"
+
+# 1) RUN_ID 環境変数があればそれを返す
 if [ -n "${RUN_ID:-}" ]; then
-  echo "$RUN_ID" > "$RID_FILE"
+  echo "$RUN_ID"
+  exit 0
 fi
-if [ -f "$RID_FILE" ]; then
-  RUN_ID="$(cat "$RID_FILE")"
-else
-  RUN_ID="$(date +%Y%m%d-%H%M%S)"
-  echo "$RUN_ID" > "$RID_FILE"
+
+# 2) 既に学習結果があるなら最新の run ディレクトリ名を返す
+if ls -1d "$ROOT/allegro/runs/"* >/dev/null 2>&1; then
+  ls -1dt "$ROOT/allegro/runs/"* | head -n1 | xargs -n1 basename
+  exit 0
 fi
-export RUN_ID
+
+# 3) 何も無ければ新規作成
+date +%Y%m%d-%H%M%S

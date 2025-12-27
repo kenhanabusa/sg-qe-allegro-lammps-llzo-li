@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+from omegaconf import OmegaConf
+import importlib
+
+def exists_target(dotted: str) -> bool:
+    try:
+        mod, cls = dotted.rsplit(".", 1)
+        m = importlib.import_module(mod)
+        getattr(m, cls)
+        return True
+    except Exception:
+        return False
+
+def pick(cands):
+    for c in cands:
+        if exists_target(c):
+            return c
+    return cands[0]
+
+def show(cfg_path: Path):
+    cfg = OmegaConf.load(cfg_path)
+    data = cfg.get("data", None)
+    if isinstance(data, dict):
+        target = data.get("_target_", None)
+        fp = (data.get("split_dataset", {}) or {}).get("file_path", None)
+    else:
+        target = getattr(data, "_target_", None)
+        fp = None
+    print("cfg:", cfg_path)
+    print("data._target_:", target)
+    print("split_dataset.file_path:", fp)
+    print("model_type_names:", cfg.get("model_type_names", None))
+    print("r_max:", cfg.get("r_max", None))
+
+def patch(cfg_path: Path, dataset: str, types: list[str]):
+    cfg = OmegaConf.load(cfg_path)
+
+    # r_max が無ければ 5.0
+    try:
+        r_max = float(cfg.get("r_max", 5.0))
+    except Exception:
+        r_max = 5.0
+    cfg.r_max = r_max
+
+    cfg.model_type_names = types
+
+    ASEDataModule = pick([
+        "nequip.data.datamodule.ASEDataModule",
+        "nequip.data.datamodule.ase_datamodule.ASEDataModule",
+    ])
+    ChemMap = pick([
+        "nequip.data.transforms.ChemicalSpeciesToAtomTypeMapper",
+        "nequip.data.transforms.TypeMapper",
+    ])
+    NList = pick([
+        "nequip.data.transforms.NeighborListTransform",
+    ])
+    StatsMgr = pick([
+        "nequip.data.CommonDataStatisticsManager",
+        "nequip.data.stats_manager.CommonDataStatisticsManager",
+    ])
+
+    # 重要：aspirin(SGDML) ではなく extxyz を読む data 設定に上書き
+    cfg.data = {
+        "_target_": ASEDataModule,
+        "seed": 0,
+        "split_dataset": {
+            "file_path": dataset,
+            "train": 0.8,
+            "val": 0.1,
+            "test": 0.1,
+        },
+        "transforms": [
+            {"_target_": ChemMap, "model_type_names": types},
+            {"_target_": NList, "r_max": r_max},
+        ],
+        "stats_manager": {
+            "_target_": StatsMgr,
+            "type_names": types,
+            "dataloader_kwargs": {"batch_size": 32},
+        },
+        "train_dataloader": {
+            "_target_": "torch.utils.data.DataLoader",
+            "batch_size": 4,
+            "shuffle": True,
+            "num_workers": 4,
+        },
+        "val_dataloader": {
+            "_target_": "torch.utils.data.DataLoader",
+            "batch_size": 4,
+            "num_workers": 4,
+        },
+        "test_dataloader": {
+            "_target_": "torch.utils.data.DataLoader",
+            "batch_size": 4,
+            "num_workers": 4,
+        },
+    }
+
+    OmegaConf.save(cfg, cfg_path)
+    print(f"[patch_train_yaml_extxyz] patched: {cfg_path} -> {dataset} types={types} r_max={r_max}")
+
+def main():
+    # --check [cfg]
+    if len(sys.argv) >= 2 and sys.argv[1] == "--check":
+        cfg = Path(sys.argv[2]) if len(sys.argv) >= 3 else Path("allegro/configs/train.yaml")
+        show(cfg)
+        return
+
+    # positional: cfg_path dataset types...
+    cfg_path = Path(sys.argv[1]) if len(sys.argv) >= 2 else Path("allegro/configs/train.yaml")
+    dataset  = sys.argv[2] if len(sys.argv) >= 3 else "dataset/train.extxyz"
+    types    = sys.argv[3:] if len(sys.argv) >= 4 else ["Li", "La", "Zr", "O"]
+
+    patch(cfg_path, dataset, types)
+
+if __name__ == "__main__":
+    main()
