@@ -1,0 +1,22 @@
+# outputs / runs
+allegro/runs/
+lammps/runs/
+artifacts/
+
+# generated datasets
+dataset/raw/
+dataset/train.extxyz
+
+# generated models (created by deploy)
+lammps/models/*.nequip.pth
+lammps/models/model.nequip.pth
+
+# tool clones / build dirs
+tools/allegro_upstream/
+tools/build_lammps_pair_allegro/
+tools/src_lammps/
+tools/src_pair_nequip_allegro/
+
+# python junk
+__pycache__/
+*.pyc

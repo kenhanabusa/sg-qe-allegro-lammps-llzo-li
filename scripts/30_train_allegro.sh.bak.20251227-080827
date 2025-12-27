@@ -24,7 +24,6 @@ mkdir -p "$RUN_DIR"
 echo "[30] train dir: $RUN_DIR"
 
 # まずは最小実行（詳細はtrain.yamlに依存）
-python3 tools/patch_train_yaml_extxyz.py allegro/configs/train.yaml dataset/train.extxyz Li La Zr O
 nequip-train --config-dir "$PWD/allegro/configs" --config-name train hydra.run.dir="allegro/runs/${RUN_ID}" hydra.job.chdir=False
 
 echo "[30] OK"

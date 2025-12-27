@@ -1,0 +1,25 @@
+units           metal
+atom_style      atomic
+boundary        p p p
+
+read_data       lammps/in/llzo_li.data
+
+# Kokkos実行はコマンドラインで -sf kk -k on g 1 を付ける想定
+# pair_nequip_allegro README: Allegroは pair_style allegro  [oai_citation:3‡GitHub](https://github.com/mir-group/pair_nequip_allegro)
+pair_style      allegro
+pair_coeff      * * lammps/model/MODEL.nequip.pth Li La Zr O
+
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+timestep        0.001
+thermo          50
+thermo_style    custom step temp pe etotal press
+
+velocity        all create 300.0 12345 mom yes rot yes dist gaussian
+fix             1 all nvt temp 300.0 300.0 0.1
+
+run             200
+write_dump      all custom lammps/out/traj.lammpstrj id type x y z
+
+unfix           1

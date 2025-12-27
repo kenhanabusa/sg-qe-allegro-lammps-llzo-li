@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "[TODO] 10_run_qe: implement on GPU server, then push back."
-exit 0
+source scripts/_run_id.sh
+echo "[10] RUN_ID=$RUN_ID"
+
+# ここは最終的にQE(AIMD)に置き換える。
+# まずは配管テストとして合成extxyzを生成する（後で dataset/raw/qe_llzo_li.extxyz に差し替え）
+python3 dataset/scripts/make_synth_llzo_li_extxyz.py
+
+echo "[10] OK (synthetic dataset generated)."
