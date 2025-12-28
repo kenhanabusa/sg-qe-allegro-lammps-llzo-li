@@ -1,4 +1,4 @@
-# QE → Allegro → LAMMPS (Li/LLZO small demo)
+# QE → Allegro → LAMMPS (Li/LLZO-like plumbing demo)
 
 Reproducible end-to-end demo:
 1) QE (short sampling / AIMD)
@@ -15,3 +15,8 @@ Reproducible end-to-end demo:
 
 This public demo is intentionally small.
 Scaling (atoms/ns/sweeps/on-prem/air-gapped) is covered via Founding 5 / support.
+
+## Status (important)
+- Current: **synthetic extxyz** is used to validate the end-to-end plumbing (dataset → train → compile → LAMMPS run).
+- Next: replace dataset generation with **QE-derived Li–LLZO small interface** extxyz.
+
