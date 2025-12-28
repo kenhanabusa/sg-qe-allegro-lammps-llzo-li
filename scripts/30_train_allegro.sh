@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source scripts/_run_id.sh
+RUN_ID="${RUN_ID:-$(bash scripts/_run_id.sh)}"
+export RUN_ID
 echo "[30] RUN_ID=$RUN_ID"
 
 # 必須コマンド確認
