@@ -28,3 +28,9 @@ Makefile.bak.*
 # python junk
 __pycache__/
 *.pyc
+
+# QE generated
+qe/inputs/
+qe/outputs/
+qe/out/
+qe/snapshots/
