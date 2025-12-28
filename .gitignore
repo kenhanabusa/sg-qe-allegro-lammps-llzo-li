@@ -36,7 +36,3 @@ qe/out/
 qe/snapshots/
 
 # QE runtime outputs (generated)
-qe/inputs/
-qe/outputs/
-qe/out/
-qe/snapshots/
